@@ -1,0 +1,49 @@
+﻿@{
+    int currentPage = ViewData["CurrentPage"] != null ? (int)ViewData["CurrentPage"] : 1;
+    int pageSize = ViewData["PageSize"] != null ? (int)ViewData["PageSize"] : 20;
+    int totalItems = ViewData["TotalItems"] != null ? (int)ViewData["TotalItems"] : 0;
+    string actionName = ViewData["ActionName"]?.ToString() ?? "Index";
+    string controllerName = ViewData["ControllerName"]?.ToString() ?? ViewContext.RouteData.Values["controller"].ToString();
+
+    int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+    // Создаем RouteValueDictionary для фильтров
+    var routeValues = new RouteValueDictionary();
+    foreach (var key in ViewData.Keys)
+    {
+        // Добавляем только фильтры, пропуская не нужные данные
+        if (key != "CurrentPage" && key != "PageSize" && key != "TotalItems" && key != "ActionName" && key != "ControllerName")
+        {
+            routeValues[key] = ViewData[key]?.ToString();
+        }
+    }
+    routeValues["pageSize"] = pageSize;
+
+    int startPage = Math.Max(1, currentPage - 2);
+    int endPage = Math.Min(totalPages, currentPage + 2);
+}
+
+<div class="pagination">
+    <ul class="pagination">
+
+
+        @for (int i = startPage; i <= endPage; i++)
+        {
+            if (i == currentPage)
+            {
+                <li class="page-item active">
+                    <span class="page-link">@i</span>
+                </li>
+            }
+            else
+            {
+                routeValues["page"] = i;
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action(actionName, controllerName, routeValues)">@i</a>
+                </li>
+            }
+        }
+
+
+    </ul>
+</div>
